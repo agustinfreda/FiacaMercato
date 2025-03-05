@@ -39,7 +39,7 @@ func writeCSV(filename string, products map[string]interface{}) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	headers := []string{"id", "nombre", "precio_oferta", "precio"}
+	headers := []string{"id", "nombre", "cantidad", "precio_oferta", "precio", "precioPorKilo", "categoria"}
 	if err := writer.Write(headers); err != nil {
 		return fmt.Errorf("error al escribir encabezado en CSV: %v", err)
 	}
@@ -51,10 +51,13 @@ func writeCSV(filename string, products map[string]interface{}) error {
 		}
 
 		nombre := fmt.Sprintf("%v", product["field1"])
+		posible_cantidad := fmt.Sprintf("%v", product["field2"])
 		precio_oferta := fmt.Sprintf("%v", product["offer_price"])
 		precio := fmt.Sprintf("%v", product["price"])
+		precioPorKilo := fmt.Sprintf("%v", product["price_for_kg"])
+		categoria := fmt.Sprintf("%v", product["category"])
 
-		if err := writer.Write([]string{id, nombre, precio_oferta, precio}); err != nil {
+		if err := writer.Write([]string{id, nombre, posible_cantidad, precio_oferta, precio, precioPorKilo, categoria}); err != nil {
 			return fmt.Errorf("error al escribir en CSV: %v", err)
 		}
 	}
