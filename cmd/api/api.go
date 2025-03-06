@@ -15,7 +15,7 @@ func indexRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllProducts(w http.ResponseWriter, r *http.Request) {
-	records := files.ReadCsvFile("/home/agustin/Documentos/workspace/FiacaMercato/productos.csv")
+	records := files.ReadCsvFile("/home/agustin/Documentos/workspace/FiacaMercato/data/23-02-2025.csv")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(records)
 }
