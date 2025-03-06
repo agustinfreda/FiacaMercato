@@ -1,16 +1,16 @@
 package api
 
 import (
-	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
+
+	files "github.com/agustinfreda/FiacaMercato/cmd/manipulateFiles"
 )
 
 func ConsumarApi(URL string) {
-	data, err := fetchJSON(URL)
+	data, err := files.FetchJSON(URL)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -22,47 +22,12 @@ func ConsumarApi(URL string) {
 		return
 	}
 
-	if err := writeCSV("productos.csv", products); err != nil {
+	if err := files.WriteCSV("productos.csv", products); err != nil {
 		fmt.Println(err)
 		return
 	}
 
 	fmt.Println("Archivo productos.csv creado correctamente.")
-}
-func writeCSV(filename string, products map[string]interface{}) error {
-	file, err := os.Create(filename)
-	if err != nil {
-		return fmt.Errorf("error al crear el archivo CSV: %v", err)
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	headers := []string{"id", "nombre", "cantidad", "precio_oferta", "precio", "precioPorKilo", "categoria"}
-	if err := writer.Write(headers); err != nil {
-		return fmt.Errorf("error al escribir encabezado en CSV: %v", err)
-	}
-
-	for id, rawProduct := range products {
-		product, ok := rawProduct.(map[string]interface{})
-		if !ok {
-			continue
-		}
-
-		nombre := fmt.Sprintf("%v", product["field1"])
-		posible_cantidad := fmt.Sprintf("%v", product["field2"])
-		precio_oferta := fmt.Sprintf("%v", product["offer_price"])
-		precio := fmt.Sprintf("%v", product["price"])
-		precioPorKilo := fmt.Sprintf("%v", product["price_for_kg"])
-		categoria := fmt.Sprintf("%v", product["category"])
-
-		if err := writer.Write([]string{id, nombre, posible_cantidad, precio_oferta, precio, precioPorKilo, categoria}); err != nil {
-			return fmt.Errorf("error al escribir en CSV: %v", err)
-		}
-	}
-
-	return nil
 }
 
 func extractInteractivities(data map[string]interface{}) (map[string]interface{}, error) {
