@@ -1,13 +1,16 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
+	"time"
 
 	files "github.com/agustinfreda/FiacaMercato/cmd/manipulateFiles"
 )
+
+func obtenerFecha() string {
+	fecha := time.Now().Format("02-01-2006")
+	return fecha
+}
 
 func ConsumarApi(URL string) {
 	data, err := files.FetchJSON(URL)
@@ -21,13 +24,13 @@ func ConsumarApi(URL string) {
 		fmt.Println(err)
 		return
 	}
-
-	if err := files.WriteCSV("productos.csv", products); err != nil {
+	ruta := fmt.Sprintf("/home/agustin/Documentos/workspace/FiacaMercato/data/%v.csv", obtenerFecha())
+	if err := files.WriteCSV(ruta, products); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	fmt.Println("Archivo productos.csv creado correctamente.")
+	fmt.Println("Información almacenada correctamente.")
 }
 
 func extractInteractivities(data map[string]interface{}) (map[string]interface{}, error) {
@@ -52,24 +55,4 @@ func extractInteractivities(data map[string]interface{}) (map[string]interface{}
 	}
 
 	return interactivities, nil
-}
-
-func fetchJSON(url string) (map[string]interface{}, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, fmt.Errorf("error al obtener el JSON: %v", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("error al leer el JSON: %v", err)
-	}
-
-	var data map[string]interface{}
-	if err := json.Unmarshal(body, &data); err != nil {
-		return nil, fmt.Errorf("error al parsear el JSON: %v", err)
-	}
-
-	return data, nil
 }

@@ -15,7 +15,7 @@ func indexRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllProducts(w http.ResponseWriter, r *http.Request) {
-	records := files.ReadCsvFile("/home/agustin/Documentos/workspace/FiacaMercato/data/23-02-2025.csv")
+	records, _ := files.ReadCsvFile("/home/agustin/Documentos/workspace/FiacaMercato/data/23-02-2025.csv")
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(records)
 }
@@ -26,5 +26,6 @@ func Rutas() {
 	router.HandleFunc("/productos", getAllProducts).Methods("GET")
 
 	// Servidor HTTP
+	log.Println("Servidor corriendo en http://localhost:4567")
 	log.Fatal(http.ListenAndServe(":4567", router))
 }

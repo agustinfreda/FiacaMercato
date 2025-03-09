@@ -3,24 +3,59 @@ package manipulatefiles
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"log"
 	"os"
 )
 
-func ReadCsvFile(filePath string) [][]string {
-	f, err := os.Open(filePath)
+type Product struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Quantity    string `json:"quantity"`
+	Offer_Price string `json:"offer_price"`
+	Price       string `json:"price"`
+	PriceKG     string `json:"pricekg"`
+	Category    string `json:"category"`
+}
+
+func ReadCsvFile(filePath string) ([]Product, error) {
+	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatal("Unable to read input file "+filePath, err)
 	}
-	defer f.Close()
+	defer file.Close()
 
-	csvReader := csv.NewReader(f)
-	records, err := csvReader.ReadAll()
-	if err != nil {
-		log.Fatal("Unable to parse file as CSV for "+filePath, err)
+	csvReader := csv.NewReader(file)
+	csvReader.TrimLeadingSpace = true
+
+	_, e := csvReader.Read()
+	if e != nil {
+		return nil, err
+	}
+	var products []Product
+	for {
+		row, err := csvReader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		producto := Product{
+			ID:          row[0],
+			Name:        row[1],
+			Quantity:    row[2],
+			Offer_Price: row[3],
+			Price:       row[4],
+			PriceKG:     row[5],
+			Category:    row[6],
+		}
+
+		products = append(products, producto)
 	}
 
-	return records
+	return products, nil
 }
 
 func WriteCSV(filename string, products map[string]interface{}) error {
@@ -45,6 +80,10 @@ func WriteCSV(filename string, products map[string]interface{}) error {
 		}
 
 		nombre := fmt.Sprintf("%v", product["field1"])
+		if nombre == "" || nombre == "<nil>" { // Evita agregar productos sin nombre
+			continue
+		}
+
 		posible_cantidad := fmt.Sprintf("%v", product["field2"])
 		precio_oferta := fmt.Sprintf("%v", product["offer_price"])
 		precio := fmt.Sprintf("%v", product["price"])
